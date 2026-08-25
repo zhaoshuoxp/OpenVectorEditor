@@ -18,6 +18,16 @@ Installers are available from [GitHub Releases](https://github.com/zhaoshuoxp/Op
 
 The Release workflow can be run manually to produce downloadable Actions artifacts without publishing. Pushing a version tag matching `package.json` (for example, `v2.1.3`) builds every platform, generates `SHA256SUMS.txt`, and publishes one GitHub Release containing the installers and auto-update metadata.
 
+### Opening an unsigned macOS build
+
+Release artifacts are unsigned unless the repository's Apple signing secrets are configured. If macOS blocks the application after you have downloaded it from this repository's GitHub Releases page and verified its checksum, move the application to `/Applications`, then remove its quarantine attribute:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/OpenVectorEditor.app"
+```
+
+Only run this command for an application whose source you trust. It recursively removes the Gatekeeper quarantine attribute from that application bundle.
+
 ## Architecture
 
 - Electron 43 main process: windows, native menus, file associations, atomic save, updates and named IPC.
