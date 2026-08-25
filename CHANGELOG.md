@@ -1,10 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Fixed repository resolution when publishing the assembled GitHub Release.
+- Avoided duplicate cross-architecture Linux packages in matrix release jobs.
+- Made Windows installer and portable artifact names URL-safe and deterministic.
+
 ## 2.1.2
 
 - Fixed unsigned macOS packaging when signing secrets are not configured.
-- Fixed repository resolution when publishing the assembled GitHub Release.
-- Avoided duplicate cross-architecture Linux packages in matrix release jobs.
 
 ## 2.1.1
 

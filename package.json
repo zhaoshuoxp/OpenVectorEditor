@@ -149,6 +149,12 @@
         }
       ]
     },
+    "nsis": {
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-${arch}-portable.${ext}"
+    },
     "linux": {
       "icon": "icon.png",
       "category": "Science",
