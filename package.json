@@ -2,6 +2,7 @@
   "name": "ove-electron",
   "version": "2.1.0",
   "description": "An independent cross-platform desktop application powered by Open Vector Editor",
+  "desktopName": "OpenVectorEditor.desktop",
   "main": "dist/main/main.cjs",
   "author": "Quanyi Zhao <quanyiz@stanford.edu>",
   "license": "CC0-1.0",
@@ -121,12 +122,18 @@
             "x64",
             "arm64"
           ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ]
     },
     "win": {
       "icon": "build/icon.ico",
-      "signAndEditExecutable": false,
       "target": [
         {
           "target": "nsis",
@@ -144,6 +151,8 @@
     },
     "linux": {
       "icon": "icon.png",
+      "category": "Science",
+      "syncDesktopName": true,
       "target": [
         {
           "target": "AppImage",
