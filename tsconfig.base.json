@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "useUnknownInCatchVariables": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@ove/contracts": ["packages/contracts/src/index.ts"],
+      "@ove/contracts/ipc": ["packages/contracts/src/ipc.ts"],
+      "@ove/editor-engine": ["packages/editor-engine/src/index.ts"],
+      "@ove/editor-engine/*": ["packages/editor-engine/src/*.ts"]
+    }
+  }
+}

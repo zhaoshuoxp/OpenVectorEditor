@@ -1,0 +1,179 @@
+{
+  "name": "ove-electron",
+  "version": "2.1.0",
+  "description": "An independent cross-platform desktop application powered by Open Vector Editor",
+  "main": "dist/main/main.cjs",
+  "author": "Quanyi Zhao <quanyiz@stanford.edu>",
+  "license": "CC0-1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhaoshuoxp/OpenVectorEditor.git"
+  },
+  "homepage": "https://github.com/zhaoshuoxp/OpenVectorEditor#readme",
+  "bugs": "https://github.com/zhaoshuoxp/OpenVectorEditor/issues",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "overrides": {
+    "esbuild": "0.27.2"
+  },
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:node\" \"npm:dev:electron\"",
+    "dev:renderer": "vite",
+    "dev:node": "tsup --watch",
+    "dev:electron": "wait-on tcp:5173 dist/main/main.cjs && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "start": "npm run build && electron . ./pA11990.gb",
+    "build": "npm run typecheck && tsup && npm run validate-preload && vite build && npm run validate-renderer",
+    "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
+    "pretest": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test",
+    "test:performance": "npm run build && playwright test --config playwright.performance.config.ts",
+    "prepare-primer3": "node scripts/prepare-primer3.js",
+    "prepare-primer3:source": "node scripts/prepare-primer3.js --from-source",
+    "validate-primer3": "node scripts/validate-primer3-resources.js",
+    "validate-primer3:mac": "node scripts/validate-primer3-resources.js darwin-arm64 darwin-x64",
+    "validate-primer3:win": "node scripts/validate-primer3-resources.js win32-x64",
+    "validate-primer3:linux": "node scripts/validate-primer3-resources.js linux-x64 linux-arm64",
+    "validate-primer3:all": "node scripts/validate-primer3-resources.js darwin-arm64 darwin-x64 win32-x64 linux-x64 linux-arm64",
+    "validate-preload": "node scripts/validate-preload-build.js",
+    "validate-renderer": "node scripts/validate-renderer-build.js",
+    "package": "npm run build && npm run validate-primer3 && electron-builder --publish never",
+    "package:all": "npm run build && npm run validate-primer3:all && electron-builder -wml --publish never",
+    "package:win": "npm run build && npm run validate-primer3:win && electron-builder --win --x64 --publish never",
+    "package:mac": "npm run build && npm run validate-primer3:mac && electron-builder --mac --publish never",
+    "package:linux": "npm run build && npm run validate-primer3:linux && electron-builder --linux --publish never",
+    "audit:ci": "npm audit --audit-level=critical",
+    "audit:production": "npm audit --omit=dev --audit-level=critical",
+    "deploy": "npm run build && npm run validate-primer3:all && electron-builder -wml --publish always"
+  },
+  "dependencies": {
+    "@teselagen/bio-parsers": "0.4.37",
+    "@teselagen/ove": "0.8.42",
+    "biomsa": "0.2.4",
+    "electron-updater": "6.8.9",
+    "electron-window-state": "5.0.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "3.24.2"
+  },
+  "devDependencies": {
+    "@electron/notarize": "3.0.1",
+    "@playwright/test": "1.62.1",
+    "@types/node": "22.13.10",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "@vitejs/plugin-react": "6.1.0",
+    "concurrently": "9.1.2",
+    "cross-env": "7.0.3",
+    "electron": "43.4.1",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.27.2",
+    "fast-check": "3.23.2",
+    "jsdom": "26.0.0",
+    "tsup": "8.5.1",
+    "typescript": "5.7.3",
+    "vite": "8.2.2",
+    "vitest": "4.1.11",
+    "wait-on": "8.0.3"
+  },
+  "build": {
+    "appId": "io.github.zhaoshuoxp.openVectorEditor",
+    "productName": "OpenVectorEditor",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "bin/primer3",
+        "to": "bin/primer3",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "publish": {
+      "provider": "github",
+      "repo": "OpenVectorEditor",
+      "owner": "zhaoshuoxp"
+    },
+    "afterSign": "dist/main/notarize.cjs",
+    "mac": {
+      "icon": "build/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "src/misc/entitlements.mac.plist",
+      "entitlementsInherit": "src/misc/entitlements.mac.plist",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "icon.png",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "fileAssociations": [
+      { "ext": "json" },
+      { "ext": "gb" },
+      { "ext": "dna" },
+      { "ext": "gbk" },
+      { "ext": "gp" },
+      { "ext": "fas" },
+      { "ext": "fasta" },
+      { "ext": "fa" },
+      { "ext": "fna" },
+      { "ext": "ffn" },
+      { "ext": "gff" },
+      { "ext": "gff3" }
+    ]
+  }
+}

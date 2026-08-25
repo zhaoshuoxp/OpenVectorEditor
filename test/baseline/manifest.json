@@ -1,0 +1,31 @@
+{
+  "legacyRuntime": {
+    "electron": "22.3.27",
+    "openVectorEditor": "18.1.53"
+  },
+  "fixtures": [
+    "blank-circular",
+    "blank-linear",
+    "protein",
+    "dense-annotations",
+    "primers",
+    "alignment",
+    "pA11990.gb"
+  ],
+  "viewports": [
+    { "width": 1000, "height": 800 },
+    { "width": 1366, "height": 768 },
+    { "width": 680, "height": 720 }
+  ],
+  "acceptance": {
+    "maximumBoundaryErrorCssPixels": 1,
+    "minimumPixelSimilarity": 0.995,
+    "maskedRegions": ["caret", "animation", "toast"]
+  },
+  "performance": {
+    "sequenceLengths": [10000, 100000, 200000],
+    "maximumAnnotations": 2000,
+    "maximumRegressionRatio": 0.1,
+    "statistics": ["median", "p95"]
+  }
+}

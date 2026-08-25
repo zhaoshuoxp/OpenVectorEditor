@@ -1,0 +1,245 @@
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f7f9fb;
+}
+
+:root:has(body.bp3-dark) { color-scheme: dark; }
+
+html,
+body,
+#root,
+#editor-root,
+.oveEditorHost {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body { color: #202b33; }
+body.bp3-dark { background: #1f2933; color: #f5f8fa; }
+button, input, textarea { font: inherit; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid #137cbd; outline-offset: 1px; }
+
+.darkModeBtn {
+  z-index: 100000;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.bp3-toast-container { z-index: 100000000; }
+
+#notification {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 100000;
+  box-sizing: border-box;
+  width: 240px;
+  padding: 20px;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
+}
+
+#notification p { margin: 0 0 12px; }
+.notification__close { position: absolute; top: 4px; right: 7px; border: 0; background: transparent; font-size: 20px; cursor: pointer; }
+.bp3-dark #notification { background: #293742; }
+
+.toolPanel {
+  position: fixed;
+  inset: 35px 0 0;
+  z-index: 99990;
+  display: flex;
+  flex-direction: column;
+  background: #f7f9fb;
+  color: #202b33;
+}
+
+.toolPanel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #d8e1e8;
+  background: #fff;
+}
+
+.toolPanel__header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+.toolPanel__close,
+.toolPanel button,
+#notification button {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #c5d0d8;
+  border-radius: 4px;
+  background: #fff;
+  color: #202b33;
+  cursor: pointer;
+}
+.toolPanel button:disabled { cursor: default; opacity: .55; }
+.toolPanel .toolPanel__primary {
+  border-color: #106ba3;
+  background: #137cbd;
+  color: #fff;
+  font-weight: 600;
+}
+
+.toolPanel__body {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  width: min(1180px, calc(100% - 40px));
+  margin: 20px auto;
+  overflow: auto;
+}
+.toolPanel__body--narrow { width: min(880px, calc(100% - 40px)); }
+
+.toolCard,
+.primerDesignSection,
+.primerDesignResult,
+.primerDesignEmptyResult {
+  box-sizing: border-box;
+  padding: 14px;
+  border: 1px solid #d8e1e8;
+  border-radius: 4px;
+  background: #fff;
+}
+.toolCard h2,
+.primerDesignSection h2 { margin: 0; font-size: 14px; font-weight: 600; }
+.toolCard__help { color: #5c7080; font-size: 13px; }
+.toolPanel__actions { display: flex; align-items: center; gap: 12px; }
+.toolStatus { color: #5c7080; font-size: 13px; }
+.toolStatus--error, .primerDesignStatus--error { color: #c23030; }
+.toolChoices { display: grid; gap: 10px; margin-top: 14px; font-size: 13px; }
+.toolChoices label { display: flex; align-items: center; gap: 7px; }
+.toolChoices--row { display: flex; }
+.autoAnnotateCard { display: grid; gap: 12px; }
+.autoAnnotateCard textarea { box-sizing: border-box; width: 100%; min-height: 260px; padding: 10px; border: 1px solid #c5d0d8; border-radius: 4px; font-family: Menlo, Monaco, monospace; }
+.annotationPreview { display: grid; gap: 7px; padding-left: 22px; }
+.annotationPreview li { display: grid; grid-template-columns: 1fr auto 80px; gap: 12px; }
+
+.primerDesignPanel__body {
+  display: grid;
+  grid-template-columns: minmax(360px, 1.3fr) minmax(260px, .7fr);
+  gap: 16px;
+  align-content: start;
+  width: min(1180px, calc(100% - 40px));
+  margin: 20px auto;
+  overflow: auto;
+}
+.primerDesignSection { display: grid; gap: 12px; align-content: start; }
+.primerDesignSection--sequence,
+.primerDesignSection--parameters,
+.primerDesignRunBar,
+.primerDesignResults { grid-column: 1 / -1; }
+.primerDesignField { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.primerDesignField--wide { grid-column: 1 / -1; }
+.primerDesignField textarea,
+.primerDesignField input,
+.primerDesignTriple input,
+.alignmentList input {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #c5d0d8;
+  border-radius: 4px;
+  background: #fff;
+  color: #202b33;
+}
+.primerDesignField textarea {
+  min-height: 180px;
+  padding: 10px;
+  font-family: Menlo, Monaco, "Ubuntu Mono", Consolas, monospace;
+  font-weight: 400;
+  resize: vertical;
+}
+.primerDesignField input, .alignmentList input { height: 34px; padding: 0 10px; }
+.primerDesignActions,
+.primerDesignCoordinateRow,
+.primerDesignRunBar { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+.primerDesignChoices { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+.primerDesignChoices label { display: inline-flex; align-items: center; gap: 6px; }
+.primerDesignTripleHeader,
+.primerDesignTriple {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) repeat(3, minmax(80px, 120px));
+  gap: 8px;
+  align-items: center;
+}
+.primerDesignTripleHeader { color: #5c7080; font-size: 12px; font-weight: 600; }
+.primerDesignTriple span { font-size: 13px; font-weight: 600; }
+.primerDesignTriple input { height: 34px; padding: 0 8px; }
+.primerDesignStatus { min-height: 20px; color: #5c7080; font-size: 13px; }
+.primerDesignResults { display: grid; gap: 12px; padding: 0; border: 0; background: transparent; }
+.primerDesignResult, .primerDesignEmptyResult { display: grid; gap: 10px; }
+.primerDesignResult__summary,
+.primerDesignResult__primer {
+  display: grid;
+  grid-template-columns: 90px minmax(160px, 1fr) minmax(160px, auto) auto;
+  gap: 10px;
+  align-items: center;
+}
+.primerDesignResult__summary { grid-template-columns: 90px repeat(2, auto) 1fr; color: #5c7080; }
+.primerDesignResult__summary strong { color: #202b33; }
+.primerDesignResult__primer span { font-size: 13px; font-weight: 600; }
+.primerDesignResult__primer code {
+  min-height: 24px;
+  padding: 4px 8px;
+  overflow-wrap: anywhere;
+  border-radius: 4px;
+  background: #eef3f7;
+  font-family: Menlo, Monaco, "Ubuntu Mono", Consolas, monospace;
+}
+
+.alignmentList, .historyList { display: grid; gap: 8px; margin: 14px 0; padding: 0; list-style: none; }
+.alignmentList li {
+  display: grid;
+  grid-template-columns: 90px minmax(180px, 1fr) 100px auto;
+  gap: 10px;
+  align-items: center;
+}
+.alignmentList__index { color: #5c7080; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+.historyList li { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 16px; padding: 10px 0; border-top: 1px solid #d8e1e8; }
+.historyList li div { display: grid; gap: 4px; }
+.historyList li div span, .historyEmpty { color: #5c7080; font-size: 13px; }
+
+.bp3-dark .toolPanel { background: #1f2933; color: #f5f8fa; }
+.bp3-dark .toolPanel__header,
+.bp3-dark .toolCard,
+.bp3-dark .primerDesignSection,
+.bp3-dark .primerDesignResult,
+.bp3-dark .primerDesignEmptyResult,
+.bp3-dark .primerDesignField textarea,
+.bp3-dark .primerDesignField input,
+.bp3-dark .primerDesignTriple input,
+.bp3-dark .alignmentList input {
+  border-color: #394b59;
+  background: #293742;
+  color: #f5f8fa;
+}
+.bp3-dark .autoAnnotateCard textarea { border-color: #394b59; background: #293742; color: #f5f8fa; }
+.bp3-dark .toolPanel__close,
+.bp3-dark .toolPanel button,
+.bp3-dark #notification button { border-color: #5c7080; background: #30404d; color: #f5f8fa; }
+.bp3-dark .primerDesignResult__primer code { background: #202b33; }
+.bp3-dark .primerDesignResult__summary strong { color: #f5f8fa; }
+.bp3-dark .historyList li { border-color: #394b59; }
+
+.fatalError { box-sizing: border-box; max-width: 720px; margin: 10vh auto; padding: 24px; }
+.startupStatus { box-sizing: border-box; padding: 24px; color: #5c7080; }
+
+@media (max-width: 720px) {
+  .primerDesignPanel__body,
+  .toolPanel__body,
+  .toolPanel__body--narrow { grid-template-columns: 1fr; width: calc(100% - 24px); margin: 12px auto; }
+  .primerDesignCoordinateRow, .primerDesignRunBar, .toolPanel__actions { align-items: stretch; flex-direction: column; }
+  .primerDesignTripleHeader { display: none; }
+  .primerDesignTriple,
+  .primerDesignResult__summary,
+  .primerDesignResult__primer,
+  .alignmentList li,
+  .historyList li { grid-template-columns: 1fr; }
+}

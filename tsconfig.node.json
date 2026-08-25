@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "types": ["node", "electron"],
+    "lib": ["ES2022", "DOM"],
+    "noEmit": true
+  },
+  "include": [
+    "src/main/**/*.ts",
+    "src/preload/**/*.ts",
+    "packages/contracts/src/**/*.ts",
+    "types/**/*.d.ts",
+    "tsup.config.ts"
+  ]
+}
