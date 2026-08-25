@@ -3,6 +3,7 @@
 ## 2.1.2
 
 - Fixed unsigned macOS packaging when signing secrets are not configured.
+- Fixed repository resolution when publishing the assembled GitHub Release.
 
 ## 2.1.1
 
