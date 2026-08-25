@@ -4,6 +4,10 @@ import { _electron as electron, expect, test, type ElectronApplication, type Pag
 let application: ElectronApplication;
 let page: Page;
 
+function toolbarButton(toolName: string) {
+  return page.locator(`.ve-tool-container-${toolName}`).getByRole("button").first();
+}
+
 test.beforeAll(async () => {
   application = await electron.launch({
     args: [
@@ -56,7 +60,7 @@ test("keeps the required toolbar order", async () => {
 });
 
 test("opens Primer Design and preserves its interaction flow", async () => {
-  await page.locator(".ve-tool-container-oligoTool button").click();
+  await toolbarButton("oligoTool").click();
   const panel = page.getByRole("region", { name: "Primer Design" });
   await expect(panel).toBeVisible();
   await expect(panel.getByText("Template Sequence")).toBeVisible();
@@ -68,11 +72,11 @@ test("opens Primer Design and preserves its interaction flow", async () => {
 });
 
 test("opens local alignment and local version history", async () => {
-  await page.locator(".ve-tool-container-alignmentTool button").click();
+  await toolbarButton("alignmentTool").click();
   await expect(page.getByRole("region", { name: "Alignment" })).toContainText("Create Alignment");
   await page.getByRole("region", { name: "Alignment" }).getByRole("button", { name: "Close" }).click();
 
-  await page.locator(".ve-tool-container-versionHistoryTool button").click();
+  await toolbarButton("versionHistoryTool").click();
   await expect(page.getByRole("region", { name: "Version History" })).toContainText("Saved Checkpoints");
   await page.getByRole("region", { name: "Version History" }).getByRole("button", { name: "Close" }).click();
 });

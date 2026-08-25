@@ -18,8 +18,8 @@ jobs:
     name: Verify release source
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 22.12.0
           cache: npm
@@ -40,14 +40,22 @@ jobs:
       - run: npm run build
       - name: Electron E2E
         run: xvfb-run --auto-servernum npm run test:e2e
+      - name: Upload E2E report on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-e2e-report
+          path: playwright-report
+          if-no-files-found: ignore
+          retention-days: 14
 
   windows:
     name: Windows x64
     needs: verify
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 22.12.0
           cache: npm
@@ -57,7 +65,7 @@ jobs:
         env:
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-windows-x64
           path: |
@@ -73,8 +81,8 @@ jobs:
     needs: verify
     runs-on: macos-15-intel
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 22.12.0
           cache: npm
@@ -87,7 +95,7 @@ jobs:
           APPLEID: ${{ secrets.APPLEID }}
           APPLEIDPASS: ${{ secrets.APPLEIDPASS }}
           APPLETEAMID: ${{ secrets.APPLETEAMID }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-macos
           path: |
@@ -112,8 +120,8 @@ jobs:
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: 22.12.0
           cache: npm
@@ -122,7 +130,7 @@ jobs:
       - run: npm run validate-primer3:linux
       - name: Build AppImage and Debian package
         run: npx electron-builder --linux --${{ matrix.arch }} --publish never
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-linux-${{ matrix.arch }}
           path: |
@@ -141,7 +149,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           pattern: release-*
           path: release-assets
@@ -153,7 +161,7 @@ jobs:
         run: ls -lh release-assets
       - name: Keep a combined artifact for manual runs
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-all-platforms
           path: release-assets

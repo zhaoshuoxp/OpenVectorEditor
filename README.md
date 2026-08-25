@@ -16,7 +16,7 @@ Installers are available from [GitHub Releases](https://github.com/zhaoshuoxp/Op
 | macOS Intel and Apple Silicon | DMG and updater ZIP |
 | Linux x64 and arm64 | AppImage and Debian package |
 
-The Release workflow can be run manually to produce downloadable Actions artifacts without publishing. Pushing a version tag matching `package.json` (for example, `v2.1.0`) builds every platform, generates `SHA256SUMS.txt`, and publishes one GitHub Release containing the installers and auto-update metadata.
+The Release workflow can be run manually to produce downloadable Actions artifacts without publishing. Pushing a version tag matching `package.json` (for example, `v2.1.1`) builds every platform, generates `SHA256SUMS.txt`, and publishes one GitHub Release containing the installers and auto-update metadata.
 
 ## Architecture
 

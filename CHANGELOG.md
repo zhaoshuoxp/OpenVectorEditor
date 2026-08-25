@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+
+- Added the application screenshot and downloadable release information to the README.
+- Added automated Windows, macOS Intel/Apple Silicon and Linux x64/arm64 release packaging.
+- Fixed Electron E2E toolbar selectors for OVE's accessible anchor buttons.
+
 ## 2.1.0
 
 - Re-established the project as an independent TypeScript desktop application.
