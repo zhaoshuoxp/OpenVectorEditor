@@ -1,6 +1,6 @@
 {
   "name": "ove-electron",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "An independent cross-platform desktop application powered by Open Vector Editor",
   "desktopName": "OpenVectorEditor.desktop",
   "main": "dist/main/main.cjs",

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.1.3
 
 - Fixed repository resolution when publishing the assembled GitHub Release.
 - Avoided duplicate cross-architecture Linux packages in matrix release jobs.
