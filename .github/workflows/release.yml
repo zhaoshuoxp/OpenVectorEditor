@@ -87,7 +87,24 @@ jobs:
           node-version: 22.12.0
           cache: npm
       - run: npm ci
+      - name: Detect macOS signing certificate
+        id: mac-signing
+        shell: bash
+        env:
+          MAC_CERTIFICATE: ${{ secrets.CSC_LINK }}
+        run: |
+          if [[ -n "$MAC_CERTIFICATE" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build unsigned DMG and ZIP packages
+        if: steps.mac-signing.outputs.enabled != 'true'
+        run: npm run package:mac
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
       - name: Build, sign, and notarize DMG and ZIP packages
+        if: steps.mac-signing.outputs.enabled == 'true'
         run: npm run package:mac
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}

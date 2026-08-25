@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2
+
+- Fixed unsigned macOS packaging when signing secrets are not configured.
+
 ## 2.1.1
 
 - Added the application screenshot and downloadable release information to the README.
