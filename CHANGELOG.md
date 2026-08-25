@@ -4,6 +4,7 @@
 
 - Fixed unsigned macOS packaging when signing secrets are not configured.
 - Fixed repository resolution when publishing the assembled GitHub Release.
+- Avoided duplicate cross-architecture Linux packages in matrix release jobs.
 
 ## 2.1.1
 
