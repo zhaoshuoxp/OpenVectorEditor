@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.2.0
 
 - Redesigned the interface styling with a shared light/dark token palette while keeping the existing layout: neutral toolbar and menu chrome, rounded menus, tooltips, dialogs, inputs and data tables, and refreshed tool panels.
 - Added a theme preference (System, Light, Dark) that follows the operating system by default, available from the switch at the top right and from View > Appearance in the native menu. Changes apply to every open window, native dialogs and menus.
