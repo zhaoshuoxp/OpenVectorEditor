@@ -13,5 +13,6 @@ export const IPC_CHANNELS = {
   setPreferences: "desktop:set-preferences",
   restartForUpdate: "desktop:restart-for-update",
   nativeCommand: "desktop:native-command",
-  updateStatus: "desktop:update-status"
+  updateStatus: "desktop:update-status",
+  preferencesChanged: "desktop:preferences-changed"
 } as const;

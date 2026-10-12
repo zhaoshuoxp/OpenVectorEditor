@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Redesigned the interface styling with a shared light/dark token palette while keeping the existing layout: neutral toolbar and menu chrome, rounded menus, tooltips, dialogs, inputs and data tables, and refreshed tool panels.
+- Added a theme preference (System, Light, Dark) that follows the operating system by default, available from the switch at the top right and from View > Appearance in the native menu. Changes apply to every open window, native dialogs and menus.
+- Windows open with a theme-matched background to avoid a white flash in dark mode.
+- Stored preferences are now validated on load; legacy `isDarkMode` settings migrate once, and the duplicate localStorage copy is no longer written.
+- Update notifications show download progress and highlight errors.
+- Circular map labels now default to 125% (View > Labels > Circular Label Size); a size you already chose is kept.
+- `npm test` no longer deletes the renderer build, so `electron .` keeps working after running the tests.
+
 ## 2.1.3
 
 - Fixed repository resolution when publishing the assembled GitHub Release.

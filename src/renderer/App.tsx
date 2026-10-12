@@ -4,6 +4,7 @@ import type {
   DocumentRevision,
   LaunchContext,
   SequenceDocument,
+  ThemeMode,
   UpdateStatus
 } from "@ove/contracts";
 import {
@@ -14,6 +15,7 @@ import {
   type EditorSession
 } from "@ove/editor-engine";
 import { TOOL_REGISTRY } from "./tools/registry";
+import { ThemeSwitch, usePrefersDark } from "./theme";
 
 const originalTitle = "Open Vector Editor";
 
@@ -26,6 +28,7 @@ export function App() {
   const [activeTool, setActiveTool] = useState<AuxiliaryTool | null>(null);
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null);
   const [fatalError, setFatalError] = useState("");
+  const prefersDark = usePrefersDark();
 
   useEffect(() => {
     let active = true;
@@ -100,16 +103,20 @@ export function App() {
     };
   }, [launch !== null, preferences !== null]);
 
+  // Main sets nativeTheme.themeSource from the preference, so prefers-color-scheme already
+  // reflects explicit choices; the preference is still consulted so the switch never lags.
+  const isDark = preferences?.theme === "dark" || (preferences?.theme !== "light" && prefersDark);
   useEffect(() => {
-    if (!preferences) return;
-    preferencesRef.current = preferences;
-    document.body.classList.toggle("bp3-dark", preferences.isDarkMode);
-    document.body.classList.toggle("ve-dark-mode", preferences.isDarkMode);
-    window.localStorage.setItem("isDarkMode", String(preferences.isDarkMode));
-    window.localStorage.setItem("oveAxisFontScalePercent", String(preferences.axisFontScalePercent));
-    applyAxisFontScale(preferences.axisFontScalePercent);
-    sessionRef.current?.setAxisFontScalePercent(preferences.axisFontScalePercent);
-  }, [preferences]);
+    document.body.classList.toggle("bp3-dark", isDark);
+    document.body.classList.toggle("ve-dark-mode", isDark);
+  }, [isDark]);
+
+  const axisFontScalePercent = preferences?.axisFontScalePercent;
+  useEffect(() => {
+    if (!axisFontScalePercent) return;
+    applyAxisFontScale(axisFontScalePercent);
+    sessionRef.current?.setAxisFontScalePercent(axisFontScalePercent);
+  }, [axisFontScalePercent]);
 
   useEffect(() => {
     if (!window.desktopApi) return;
@@ -118,25 +125,24 @@ export function App() {
       if (command === "open-file") void window.desktopApi.openFiles();
     });
     const removeUpdate = window.desktopApi.onUpdateStatus(setUpdateStatus);
+    const removePreferences = window.desktopApi.onPreferencesChanged(applyPreferences);
     return () => {
       removeNative();
       removeUpdate();
+      removePreferences();
     };
   }, []);
 
-  const updateAxisFontScale = async (percent: AxisFontScale): Promise<void> => {
-    const next = await window.desktopApi.setPreferences({ axisFontScalePercent: percent });
+  function applyPreferences(next: AppPreferences): void {
     preferencesRef.current = next;
     setPreferences(next);
-  };
+  }
 
-  const toggleDarkMode = async (): Promise<void> => {
-    const next = await window.desktopApi.setPreferences({
-      isDarkMode: !(preferencesRef.current?.isDarkMode ?? false)
-    });
-    preferencesRef.current = next;
-    setPreferences(next);
+  const savePreferences = async (patch: Partial<AppPreferences>): Promise<void> => {
+    applyPreferences(await window.desktopApi.setPreferences(patch));
   };
+  const updateAxisFontScale = (percent: AxisFontScale) => savePreferences({ axisFontScalePercent: percent });
+  const setTheme = (theme: ThemeMode) => savePreferences({ theme });
 
   const getDocument = (): SequenceDocument => sessionRef.current?.getDocument() ?? launch?.document ?? {};
   const closeTool = (): void => setActiveTool(null);
@@ -159,15 +165,7 @@ export function App() {
     <>
       <div id="editor-root" ref={hostRef} />
       {(!launch || !preferences) && <main className="startupStatus">Loading Open Vector Editor…</main>}
-      <button
-        className="bp3-button bp3-minimal darkModeBtn"
-        type="button"
-        aria-label="Toggle dark mode"
-        title="Toggle dark mode"
-        onClick={() => void toggleDarkMode()}
-      >
-        <span className="bp3-icon-standard bp3-icon-moon" aria-hidden="true" />
-      </button>
+      {preferences && <ThemeSwitch value={preferences.theme} onChange={(theme) => void setTheme(theme)} />}
 
       {activeToolDefinition && activeSession && activeToolDefinition.render({
         document: getDocument(),
@@ -186,11 +184,14 @@ function UpdateNotification({ status, close }: { status: UpdateStatus; close(): 
   const message = updateMessage(status);
   if (!message) return null;
   return (
-    <aside id="notification" aria-live="polite">
+    <aside id="notification" className={status.state === "error" ? "notification--error" : undefined} aria-live="polite">
       <button className="notification__close" aria-label="Dismiss update notification" type="button" onClick={close}>×</button>
       <p>{message}</p>
+      {status.state === "progress" && (
+        <progress className="notification__progress" max={100} value={Math.round(status.percent)} />
+      )}
       {status.state === "downloaded" && (
-        <button type="button" onClick={() => void window.desktopApi.restartForUpdate()}>Restart</button>
+        <button className="toolPanel__primary" type="button" onClick={() => void window.desktopApi.restartForUpdate()}>Restart</button>
       )}
     </aside>
   );
@@ -234,17 +235,32 @@ function notifySuccess(message: string): void {
   if (window.toastr) window.toastr.success(message);
 }
 
+const LEGACY_DARK_MODE_KEY = "isDarkMode";
+const LEGACY_AXIS_SCALE_KEY = "oveAxisFontScalePercent";
+
+/**
+ * Releases before preferences.json kept these values in localStorage. They are imported once
+ * and then removed, so later explicit choices (including "system") are never overridden.
+ */
 async function migrateLegacyPreferences(preferences: AppPreferences): Promise<AppPreferences> {
-  const legacyDarkMode = window.localStorage.getItem("isDarkMode");
-  const legacyAxisScale = Number(window.localStorage.getItem("oveAxisFontScalePercent"));
+  let storage: Storage;
+  try {
+    storage = window.localStorage;
+  } catch {
+    return preferences;
+  }
+  const legacyDarkMode = storage.getItem(LEGACY_DARK_MODE_KEY);
+  const legacyAxisScale = storage.getItem(LEGACY_AXIS_SCALE_KEY);
+  if (legacyDarkMode === null && legacyAxisScale === null) return preferences;
+
   const patch: Partial<AppPreferences> = {};
-  if (legacyDarkMode === "true" || legacyDarkMode === "false") {
-    patch.isDarkMode = legacyDarkMode === "true";
+  if (legacyDarkMode === "true" && preferences.theme === "system") patch.theme = "dark";
+  const axisScale = Number(legacyAxisScale);
+  if (AXIS_FONT_SCALE_VALUES.includes(axisScale as AxisFontScale)) {
+    patch.axisFontScalePercent = axisScale as AxisFontScale;
   }
-  if (AXIS_FONT_SCALE_VALUES.includes(legacyAxisScale as AxisFontScale)) {
-    patch.axisFontScalePercent = legacyAxisScale as AxisFontScale;
-  }
-  return Object.keys(patch).length
-    ? window.desktopApi.setPreferences({ ...preferences, ...patch })
-    : preferences;
+  const migrated = Object.keys(patch).length ? await window.desktopApi.setPreferences(patch) : preferences;
+  storage.removeItem(LEGACY_DARK_MODE_KEY);
+  storage.removeItem(LEGACY_AXIS_SCALE_KEY);
+  return migrated;
 }

@@ -1,3 +1,5 @@
+// Must stay the first import: it seeds settings OVE reads while its own module is evaluated.
+import "./defaults";
 import {
   createVectorEditor,
   type OveEditorInstance,

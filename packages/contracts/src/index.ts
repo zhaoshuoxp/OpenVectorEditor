@@ -147,8 +147,11 @@ export interface DocumentRevision {
   document: SequenceDocument;
 }
 
+export const THEME_MODES = ["system", "light", "dark"] as const;
+export type ThemeMode = (typeof THEME_MODES)[number];
+
 export interface AppPreferences {
-  isDarkMode: boolean;
+  theme: ThemeMode;
   axisFontScalePercent: 33 | 50 | 75 | 100 | 125 | 150 | 200;
 }
 
@@ -178,6 +181,7 @@ export interface DesktopApi {
   restartForUpdate(): Promise<void>;
   onNativeCommand(listener: (command: NativeCommand) => void): () => void;
   onUpdateStatus(listener: (status: UpdateStatus) => void): () => void;
+  onPreferencesChanged(listener: (preferences: AppPreferences) => void): () => void;
 }
 
 const finiteNumber = z.number().finite();
@@ -235,7 +239,7 @@ export const alignmentRequestSchema = z.object({
 });
 
 export const preferencesPatchSchema = z.object({
-  isDarkMode: z.boolean().optional(),
+  theme: z.enum(THEME_MODES).optional(),
   axisFontScalePercent: z.union([
     z.literal(33),
     z.literal(50),

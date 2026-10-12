@@ -5,6 +5,7 @@ import {
   BrowserWindow,
   dialog,
   ipcMain,
+  nativeTheme,
   type IpcMainInvokeEvent
 } from "electron";
 import windowStateKeeper from "electron-window-state";
@@ -15,12 +16,14 @@ import {
   preferencesPatchSchema,
   primerDesignRequestSchema,
   saveDocumentRequestSchema,
+  type AppPreferences,
   type LaunchContext,
   type AlignmentRequest,
   type NativeCommand,
   type PrimerDesignRequest,
   type SaveDocumentRequest,
   type SequenceDocument,
+  type ThemeMode,
   type UpdateStatus
 } from "@ove/contracts";
 import { AlignmentService } from "./services/alignment-service";
@@ -38,6 +41,9 @@ import { HistoryService } from "./services/history-service";
 import { PreferencesService } from "./services/preferences-service";
 import { Primer3Service } from "./services/primer3-service";
 import { focusedWindow, installApplicationMenu } from "./menu";
+
+// Matches --ove-bg in src/renderer/style.css so windows do not flash before the renderer paints.
+const WINDOW_BACKGROUND = { light: "#ffffff", dark: "#1b1d21" } as const;
 
 interface WindowRecord {
   browserWindow: BrowserWindow;
@@ -72,10 +78,10 @@ app.whenReady().then(async () => {
   historyService = new HistoryService(path.join(app.getPath("userData"), "history"));
   preferencesService = new PreferencesService(app.getPath("userData"));
   registerIpcHandlers();
-  installApplicationMenu({
-    createNewWindow: () => void createWindow({ document: { circular: true } }),
-    openFiles: () => openFilesFromDialog(focusedWindow()),
-    openPrimerDesign: () => sendNativeCommand("primer-design")
+  applyTheme((await preferencesService.get()).theme);
+  nativeTheme.on("updated", () => {
+    const background = currentWindowBackground();
+    for (const { browserWindow } of windows.values()) browserWindow.setBackgroundColor(background);
   });
   configureAutoUpdater();
 
@@ -115,6 +121,7 @@ async function createWindow(launchContext: LaunchContext): Promise<BrowserWindow
     width: state.width,
     height: state.height,
     show: false,
+    backgroundColor: currentWindowBackground(),
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.cjs"),
       contextIsolation: true,
@@ -280,9 +287,7 @@ function registerIpcHandlers(): void {
 
   ipcMain.handle(IPC_CHANNELS.setPreferences, (event, input: unknown) => {
     getRecord(event);
-    return preferencesService.update(
-      preferencesPatchSchema.parse(input) as Partial<import("@ove/contracts").AppPreferences>
-    );
+    return updatePreferences(preferencesPatchSchema.parse(input) as Partial<AppPreferences>);
   });
 
   ipcMain.handle(IPC_CHANNELS.restartForUpdate, (event) => {
@@ -319,6 +324,34 @@ function configureAutoUpdater(): void {
   });
   autoUpdater.on("error", (error) => send({ state: "error", message: error.message }));
   if (app.isPackaged) void autoUpdater.checkForUpdatesAndNotify();
+}
+
+async function updatePreferences(patch: Partial<AppPreferences>): Promise<AppPreferences> {
+  const preferences = await preferencesService.update(patch);
+  if (patch.theme) applyTheme(preferences.theme);
+  for (const { browserWindow } of windows.values()) {
+    browserWindow.webContents.send(IPC_CHANNELS.preferencesChanged, preferences);
+  }
+  return preferences;
+}
+
+/**
+ * nativeTheme drives prefers-color-scheme in every renderer, native dialogs and menus,
+ * so "system" follows the OS live and explicit choices override it everywhere at once.
+ */
+function applyTheme(theme: ThemeMode): void {
+  nativeTheme.themeSource = theme;
+  installApplicationMenu({
+    createNewWindow: () => void createWindow({ document: { circular: true } }),
+    openFiles: () => openFilesFromDialog(focusedWindow()),
+    openPrimerDesign: () => sendNativeCommand("primer-design"),
+    theme,
+    setTheme: (next) => void updatePreferences({ theme: next })
+  });
+}
+
+function currentWindowBackground(): string {
+  return nativeTheme.shouldUseDarkColors ? WINDOW_BACKGROUND.dark : WINDOW_BACKGROUND.light;
 }
 
 function sendNativeCommand(command: NativeCommand): void {

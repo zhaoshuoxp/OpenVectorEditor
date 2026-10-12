@@ -12,7 +12,8 @@ export default defineConfig({
   target: "node22",
   platform: "node",
   sourcemap: true,
-  clean: true,
+  // dist/renderer belongs to vite; `npm test` runs tsup via pretest and must not delete it.
+  clean: ["!renderer/**"],
   splitting: false,
   dts: false,
   external: ["electron"],

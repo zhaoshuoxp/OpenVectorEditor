@@ -44,6 +44,18 @@ test("keeps the native application menu and editor menu", async () => {
   await expect(editorMenu).toContainText("Help");
 });
 
+test("defaults the circular label size to 125%", async () => {
+  expect(await page.evaluate(() => window.localStorage.getItem("labelSize"))).toBe("10");
+  const editorMenu = page.locator(".veMenuBarContainer");
+  await editorMenu.getByRole("button", { name: "View" }).click();
+  await page.locator(".bp3-menu-item").filter({ hasText: /^Labels/ }).hover();
+  await page.locator(".bp3-menu-item").filter({ hasText: /^Circular Label Size/ }).hover();
+  const checked = page.locator(".bp3-menu-item").filter({ has: page.locator(".bp3-icon-small-tick") });
+  await expect(checked.filter({ hasText: /^125%$/ })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+});
+
 test("keeps the required toolbar order", async () => {
   const expectedOrder = [
     "saveTool", "downloadTool", "importTool", "undoTool", "redoTool", "cutsiteTool",
@@ -81,13 +93,38 @@ test("opens local alignment and local version history", async () => {
   await page.getByRole("region", { name: "Version History" }).getByRole("button", { name: "Close" }).click();
 });
 
-test("persists dark mode through the named desktop API", async () => {
-  const darkButton = page.getByRole("button", { name: "Toggle dark mode" });
-  await darkButton.click();
+test("persists the theme choice and follows the system setting", async () => {
+  const themeSwitch = page.getByRole("radiogroup", { name: "Theme" });
+  const nativeThemeSource = () => application.evaluate(({ nativeTheme }) => nativeTheme.themeSource);
+
+  await themeSwitch.getByRole("radio", { name: "Dark theme" }).click();
   await expect(page.locator("body")).toHaveClass(/bp3-dark/);
+  await expect.poll(nativeThemeSource).toBe("dark");
   await page.reload();
   await page.locator(".veEditor").waitFor();
   await expect(page.locator("body")).toHaveClass(/bp3-dark/);
+  await expect(themeSwitch.getByRole("radio", { name: "Dark theme" })).toHaveAttribute("aria-checked", "true");
+
+  await themeSwitch.getByRole("radio", { name: "Light theme" }).click();
+  await expect(page.locator("body")).not.toHaveClass(/bp3-dark/);
+  await expect.poll(nativeThemeSource).toBe("light");
+
+  await themeSwitch.getByRole("radio", { name: "Use system theme" }).click();
+  await expect.poll(nativeThemeSource).toBe("system");
+  const systemIsDark = await application.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors);
+  await expect(page.locator("body")).toHaveClass(systemIsDark ? /bp3-dark/ : /^(?!.*bp3-dark)/);
+
+  const appearanceMenu = await application.evaluate(({ Menu }) =>
+    Menu.getApplicationMenu()?.items
+      .find((item) => item.label === "View")?.submenu?.items
+      .find((item) => item.label === "Appearance")?.submenu?.items
+      .map((item) => ({ label: item.label, checked: item.checked }))
+  );
+  expect(appearanceMenu).toEqual([
+    { label: "Use System Setting", checked: true },
+    { label: "Light", checked: false },
+    { label: "Dark", checked: false }
+  ]);
 });
 
 for (const viewport of [

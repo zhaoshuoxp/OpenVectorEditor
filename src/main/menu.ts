@@ -1,10 +1,19 @@
 import { BrowserWindow, Menu, type MenuItemConstructorOptions } from "electron";
+import type { ThemeMode } from "@ove/contracts";
 
 interface MenuActions {
   createNewWindow(): void;
   openFiles(): Promise<void>;
   openPrimerDesign(): void;
+  theme: ThemeMode;
+  setTheme(theme: ThemeMode): void;
 }
+
+const THEME_LABELS: Record<ThemeMode, string> = {
+  system: "Use System Setting",
+  light: "Light",
+  dark: "Dark"
+};
 
 export function installApplicationMenu(actions: MenuActions): void {
   const isMac = process.platform === "darwin";
@@ -57,6 +66,16 @@ export function installApplicationMenu(actions: MenuActions): void {
         { role: "resetZoom" },
         { role: "zoomIn" },
         { role: "zoomOut" },
+        { type: "separator" },
+        {
+          label: "Appearance",
+          submenu: (Object.keys(THEME_LABELS) as ThemeMode[]).map((theme) => ({
+            label: THEME_LABELS[theme],
+            type: "radio" as const,
+            checked: actions.theme === theme,
+            click: () => actions.setTheme(theme)
+          }))
+        },
         { type: "separator" },
         { role: "togglefullscreen" }
       ]

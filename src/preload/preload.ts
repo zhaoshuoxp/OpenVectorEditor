@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import {
+  type AppPreferences,
   type DesktopApi,
   type NativeCommand,
   type UpdateStatus
@@ -29,6 +30,11 @@ const desktopApi: DesktopApi = {
     const wrapped = (_event: Electron.IpcRendererEvent, status: UpdateStatus): void => listener(status);
     ipcRenderer.on(IPC_CHANNELS.updateStatus, wrapped);
     return () => ipcRenderer.removeListener(IPC_CHANNELS.updateStatus, wrapped);
+  },
+  onPreferencesChanged: (listener) => {
+    const wrapped = (_event: Electron.IpcRendererEvent, preferences: AppPreferences): void => listener(preferences);
+    ipcRenderer.on(IPC_CHANNELS.preferencesChanged, wrapped);
+    return () => ipcRenderer.removeListener(IPC_CHANNELS.preferencesChanged, wrapped);
   }
 };
 

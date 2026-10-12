@@ -64,11 +64,20 @@ describe("desktop persistence", () => {
     expect(await history.list(secondFile)).toHaveLength(1);
   });
 
-  it("persists dark mode and axis font scale", async () => {
+  it("persists theme and axis font scale", async () => {
     const directory = await temporaryDirectory();
     const preferences = new PreferencesService(directory);
-    expect(await preferences.get()).toEqual({ isDarkMode: false, axisFontScalePercent: 100 });
-    await preferences.update({ isDarkMode: true, axisFontScalePercent: 150 });
-    expect(await new PreferencesService(directory).get()).toEqual({ isDarkMode: true, axisFontScalePercent: 150 });
+    expect(await preferences.get()).toEqual({ theme: "system", axisFontScalePercent: 100 });
+    await preferences.update({ theme: "dark", axisFontScalePercent: 150 });
+    expect(await new PreferencesService(directory).get()).toEqual({ theme: "dark", axisFontScalePercent: 150 });
+  });
+
+  it("migrates legacy dark mode and drops invalid stored values", async () => {
+    const directory = await temporaryDirectory();
+    const file = path.join(directory, "preferences.json");
+    await fs.writeFile(file, JSON.stringify({ isDarkMode: true, axisFontScalePercent: 42 }));
+    expect(await new PreferencesService(directory).get()).toEqual({ theme: "dark", axisFontScalePercent: 100 });
+    await fs.writeFile(file, JSON.stringify({ isDarkMode: false, theme: "sepia" }));
+    expect(await new PreferencesService(directory).get()).toEqual({ theme: "system", axisFontScalePercent: 100 });
   });
 });

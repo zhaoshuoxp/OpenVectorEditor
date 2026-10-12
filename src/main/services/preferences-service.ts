@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import type { AppPreferences } from "@ove/contracts";
+import { preferencesPatchSchema, type AppPreferences } from "@ove/contracts";
 
 const defaultPreferences: AppPreferences = {
-  isDarkMode: false,
+  theme: "system",
   axisFontScalePercent: 100
 };
 
@@ -18,7 +18,7 @@ export class PreferencesService {
   public async get(): Promise<AppPreferences> {
     try {
       const contents = await fs.readFile(this.preferencesPath, "utf8");
-      return { ...defaultPreferences, ...(JSON.parse(contents) as Partial<AppPreferences>) };
+      return { ...defaultPreferences, ...sanitizeStoredPreferences(JSON.parse(contents)) };
     } catch {
       return { ...defaultPreferences };
     }
@@ -32,4 +32,21 @@ export class PreferencesService {
     await fs.rename(temporaryPath, this.preferencesPath);
     return preferences;
   }
+}
+
+/**
+ * Keeps only recognised values from disk. Files written before the theme
+ * preference existed stored a boolean `isDarkMode`; `false` was the default and
+ * cannot be told apart from "never chosen", so only `true` is kept as an explicit choice.
+ */
+function sanitizeStoredPreferences(stored: unknown): Partial<AppPreferences> {
+  if (typeof stored !== "object" || stored === null) return {};
+  const { isDarkMode, ...rest } = stored as Record<string, unknown>;
+  const result: Partial<AppPreferences> = {};
+  for (const [key, value] of Object.entries(rest)) {
+    const parsed = preferencesPatchSchema.safeParse({ [key]: value });
+    if (parsed.success) Object.assign(result, parsed.data);
+  }
+  if (!result.theme && isDarkMode === true) result.theme = "dark";
+  return result;
 }
