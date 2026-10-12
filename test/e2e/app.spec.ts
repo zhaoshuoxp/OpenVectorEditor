@@ -48,8 +48,16 @@ test("defaults the circular label size to 125%", async () => {
   expect(await page.evaluate(() => window.localStorage.getItem("labelSize"))).toBe("10");
   const editorMenu = page.locator(".veMenuBarContainer");
   await editorMenu.getByRole("button", { name: "View" }).click();
-  await page.locator(".bp3-menu-item").filter({ hasText: /^Labels/ }).hover();
-  await page.locator(".bp3-menu-item").filter({ hasText: /^Circular Label Size/ }).hover();
+  // Blueprint opens submenus on a hover delay that is longer on a cold start, so retry each hop.
+  const openSubmenu = async (parent: RegExp, child: RegExp) => {
+    const childItem = page.locator(".bp3-menu-item").filter({ hasText: child });
+    await expect(async () => {
+      await page.locator(".bp3-menu-item").filter({ hasText: parent }).hover();
+      await expect(childItem.first()).toBeVisible({ timeout: 1_000 });
+    }).toPass();
+  };
+  await openSubmenu(/^Labels/, /^Circular Label Size/);
+  await openSubmenu(/^Circular Label Size/, /^125%$/);
   const checked = page.locator(".bp3-menu-item").filter({ has: page.locator(".bp3-icon-small-tick") });
   await expect(checked.filter({ hasText: /^125%$/ })).toBeVisible();
   await page.keyboard.press("Escape");

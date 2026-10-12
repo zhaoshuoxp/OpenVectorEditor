@@ -9,6 +9,7 @@
 - Update notifications show download progress and highlight errors.
 - Circular map labels now default to 125% (View > Labels > Circular Label Size); a size you already chose is kept.
 - `npm test` no longer deletes the renderer build, so `electron .` keeps working after running the tests.
+- Upgraded Electron to 43.7.9 for the sandboxed preload code cache advisory (GHSA-qmv3-fv6v-rmhq), and updated locked dependencies to clear the critical `shell-quote` advisory (GHSA-pqg4-j6r4-53mv).
 
 ## 2.1.3
 
