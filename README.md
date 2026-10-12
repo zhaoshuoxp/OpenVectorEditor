@@ -4,7 +4,10 @@ An independent cross-platform desktop application with a strict TypeScript appli
 
 This repository is not a source fork or vendored copy of OVE. OVE is consumed only through the pinned npm dependency and isolated behind `EditorEngine`, so its implementation can be upgraded or replaced without coupling desktop services to OVE internals.
 
-![Open Vector Editor Desktop showing the circular and sequence maps](docs/open-vector-editor-desktop.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/open-vector-editor-desktop-dark.png">
+  <img alt="Open Vector Editor Desktop showing the circular and sequence maps" src="docs/open-vector-editor-desktop.png">
+</picture>
 
 ## Releases
 
